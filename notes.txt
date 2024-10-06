@@ -1,0 +1,109 @@
+import pygame
+import pymunk
+from pymunk import Vec2d
+
+# Initialize Pygame for rendering
+pygame.init()
+
+# Screen dimensions
+WIDTH, HEIGHT = 800, 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+clock = pygame.time.Clock()
+
+# Physics space
+space = pymunk.Space()
+space.gravity = (0, 900)  # Set gravity downwards
+
+# Define some basic colors
+WHITE = (255, 255, 255)
+BLUE = (0, 0, 255)
+RED = (255, 0, 0)
+
+# Beam class for managing each beam in the bridge
+class Beam:
+    def __init__(self, pos_a, pos_b, thickness, max_force):
+        self.body = pymunk.Body(body_type=pymunk.Body.DYNAMIC)
+        self.shape = pymunk.Segment(self.body, pos_a, pos_b, thickness)
+        self.shape.friction = 0.9
+        self.shape.elasticity = 0.5
+        self.shape.mass = 1.0
+        self.max_force = max_force  # Maximum force before it breaks
+        space.add(self.body, self.shape)
+
+# Function to add a joint between two bodies
+def add_joint(body_a, body_b, anchor_a, anchor_b):
+    joint = pymunk.PinJoint(body_a, body_b, anchor_a, anchor_b)
+    space.add(joint)
+    return joint
+
+# Bridge setup (3 beams, 4 joints)
+joints = []
+beams = []
+
+# Create fixed static bodies (ground points) for the bridge ends
+static_body_a = pymunk.Body(body_type=pymunk.Body.STATIC)
+static_body_b = pymunk.Body(body_type=pymunk.Body.STATIC)
+static_body_a.position = (100, 500)
+static_body_b.position = (700, 500)
+
+# Create dynamic bodies for joints (pylons in the middle)
+joint_body_1 = pymunk.Body(body_type=pymunk.Body.DYNAMIC)
+joint_body_1.position = (300, 300)
+
+joint_body_2 = pymunk.Body(body_type=pymunk.Body.DYNAMIC)
+joint_body_2.position = (500, 300)
+
+space.add(joint_body_1, joint_body_2)
+
+# Add beams connecting the joints
+beam_1 = Beam(static_body_a.position, joint_body_1.position, 5, max_force=5000)
+beam_2 = Beam(joint_body_1.position, joint_body_2.position, 5, max_force=5000)
+beam_3 = Beam(joint_body_2.position, static_body_b.position, 5, max_force=5000)
+
+# Store beams for breaking simulation
+beams = [beam_1, beam_2, beam_3]
+
+# Add pin joints to hold the beams together
+joints.append(add_joint(static_body_a, joint_body_1, (0, 0), (0, 0)))
+joints.append(add_joint(joint_body_1, joint_body_2, (0, 0), (0, 0)))
+joints.append(add_joint(joint_body_2, static_body_b, (0, 0), (0, 0)))
+
+# Simple strain force check
+def check_beam_strain(beam):
+    force = abs(beam.body.force.length)
+    if force > beam.max_force:
+        print("Beam broke due to excessive force!")
+        space.remove(beam.shape, beam.body)
+        return True
+    return False
+
+# Pygame draw function
+def draw():
+    screen.fill(WHITE)
+    
+    # Draw each beam
+    for beam in beams:
+        start = beam.shape.a + beam.body.position
+        end = beam.shape.b + beam.body.position
+        color = RED if check_beam_strain(beam) else BLUE
+        pygame.draw.line(screen, color, start, end, 5)
+    
+    pygame.display.flip()
+
+# Simulation loop
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+    
+    # Step the physics simulation
+    space.step(1 / 60.0)
+    
+    # Draw the current state of the bridge
+    draw()
+    
+    # Cap the frame rate
+    clock.tick(60)
+
+pygame.quit()
