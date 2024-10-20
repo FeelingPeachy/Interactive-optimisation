@@ -66,3 +66,7 @@ Goal-Oriented Dialogue System*
 
 2. SLOT Labelling
 
+
+
+Given a set of designs that meets defined geometrical and behavioral constraints and objectives, structural optimisation aims to select the best of all possible designs \cite{Eschenauer1997}. This is particularly helpful for a designer whereby it provides the means to experiment with different structural forms and materials, contributing to more impactful use of resources, but also considering aesthetic value. Considering  its application in bridge design (in 2D space), topology optimization is particularly informative, where It focuses on finding a conceptual layout within a design space that achieves the best structural performance while minimising material use. Through strategic distribution of material, involving deliberate removal and addition of excess material, engineers can design light yet strong structures, all whilst satisfying constraints. In a model where a 2D bridge is represented by beams and nodes (often referred to as a truss or frame structure), topology optimization can be used to rearrange the ordering of beams, add more beams, or remove redundant beams to achieve the most efficient design. In this type of structural optimization, the beams and nodes form a discrete design space, and the topology optimization process will determine the optimal arrangement of these elements. Optimising a bridge’s topology in this way has far more potential for cost savings and structural performance than its sizing counterparts, where in addition, it is not bounded by the original shape.
+
